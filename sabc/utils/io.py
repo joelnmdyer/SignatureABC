@@ -1,7 +1,7 @@
 import errno
 import numpy as np
 import os
-from sabc.models import GBM, Ricker, GSE, BH, Hopfield
+from sabc.models import GBM, Ricker, GSE, BH, ZMN
 from sabc.utils import distributions
 from sklearn.linear_model import LinearRegression
 import statsmodels.api as sm
@@ -14,7 +14,7 @@ task2task = {"gbm":"GBM",
 			 "gse":"GSE",
 			 "bh":"BH",
 			 "bhn":"BH",
-			 "hop":"Hopfield"}
+			 "zmn":"ZMN"}
 
 def _name2T(name):
 
@@ -26,7 +26,7 @@ def _name2T(name):
 		T = 100
 	elif name == "gse":
 		T = None
-	elif name == "hop":
+	elif name == "zmn":
 		T = 25
 	return T
 
@@ -42,8 +42,8 @@ def _load_simulator(task_name):
 		model = Ricker.Model()
 	elif task_name == "gse":
 		model = GSE.Model()
-	elif task_name == "hop":
-		model = Hopfield.Model()
+	elif task_name == "zmn":
+		model = ZMN.Model(N=20)
 
 	# Everything is basepoint-ed by default
 	def simulator(pars):
@@ -68,7 +68,7 @@ def _load_prior(task_name):
 	elif task_name == "gse":
 		prior = distributions.GSEBoxGamma(lmbdas=[0.1,0.2],
 								  		  nus	=[2. ,0.5])
-	elif task_name == "hop":
+	elif task_name == "zmn":
 		prior = distributions.BoxUniform(low = [0., 0.],
 										 high = [1.,1.])
 	return prior
@@ -97,8 +97,8 @@ def _load_dataset(task_name):
 		y = np.concatenate((y.reshape(-1,1), ts), axis=-1)
 	elif task_name == "gse":
 		y = np.loadtxt(os.path.join(this_dir, "../data/GSE/obs.txt"))
-	elif task_name == "hop":
-		y = np.load(os.path.join(this_dir, "../data/Hopfield/obs.npy"))
+	elif task_name == "zmn":
+		y = np.load(os.path.join(this_dir, "../data/ZMN/obs_cumsum.npy"))
 	return y
 
 def _load_true_pars(task_name):
@@ -113,8 +113,8 @@ def _load_true_pars(task_name):
 		theta = np.array([4.,10.,.3])
 	elif task_name == "gse":
 		theta = np.array([1e-2,1e-1])
-	elif task_name == "hop":
-		theta = np.array([0.8, 0.5])
+	elif task_name == "zmn":
+		theta = np.array([0.4, 0.7])
 	return theta
 
 def _load_summariser(task_name):
@@ -180,7 +180,7 @@ def _load_summariser(task_name):
 			to_return = np.concatenate((n0s, mns, ac5, coefs1, coefs2), axis=1)
 			return to_return
 
-	elif task_name in ["gse", "hop"]:
+	elif task_name in ["gse", "zmn"]:
 
 		summariser = None
 
@@ -198,7 +198,7 @@ def _load_theta_transformer(task_name):
 		high, low = np.array([1.,2.]), np.array([-1,0.2])
 	elif task_name == "ricker":
 		high, low = np.array([8.,20.,0.6]), np.array([3.,0.,0.])
-	elif task_name == "hop":
+	elif task_name == "zmn":
 		high, low = np.array([1.,1.]), np.array([0.,0.])
 	rnge = high - low
 	fun = lambda x: (x - low)/rnge
