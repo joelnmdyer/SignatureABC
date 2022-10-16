@@ -94,7 +94,7 @@ def run(task,
 			dc = dc.train(train_xs)
 
 	elif name == "mmd":
-		if task in ["hop"]:
+		if task in ["zmn"]:
 			wl_kernel = kernels.WL_t_Kernel(obs, base_t_kernel=None)
 			dc = distance_calculator(obs, base_kernel=wl_kernel,
 									 remove_time=False, unsqueeze=True)
@@ -112,7 +112,7 @@ def run(task,
 			dc = distance_calculator(obs, None, cumsum=True, order=depth, lead_lag=leadlag)
 			train_xs, _ = generate_training_data(simulator, prior, n_train)
 			dc = dc.train(train_xs)
-		elif task in ["hop"]:
+		elif task in ["zmn"]:
 			wl_kernel = kernels.WL_t_Kernel(obs)
 			dc = distance_calculator(obs, static_kernel=wl_kernel, rescale=1.,
 									 order=depth, lead_lag=leadlag)
